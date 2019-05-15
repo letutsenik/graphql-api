@@ -18,25 +18,48 @@ const users = [{
     email: 'kate@example.com'
 }];
 
-// Demo user data
+// Demo posts data
 const posts = [
     {
-        id: 1,
+        id: '1',
         title: 'GraphQL',
         body: 'This is the post about GraphQL',
-        published: true
+        published: true,
+        author: '1'
     },
     {
-        id: 2,
+        id: '2',
         title: 'SOLID',
         body: 'This is the post about SOLID principals',
-        published: true
+        published: true,
+        author: '1'
     },
     {
-        id: 3,
+        id: '3',
         title: 'NodeJS',
         body: 'This is the post about NodeJS',
-        published: false
+        published: false,
+        author: '2'
+    },
+];
+
+// Demo comments data
+const comments = [
+    {
+        id: '1',
+        text: 'This is awesome post. I love it'
+    },
+    {
+        id: '2',
+        text: 'Cool! I like it. Keep posting!'
+    },
+    {
+        id: '3',
+        text: 'What exactly do you mean?'
+    },
+    {
+        id: '4',
+        text: 'I like it! Thanks for your post'
     },
 ];
 
@@ -45,6 +68,7 @@ const typeDefs = `
     type Query {
         users(query: String): [User!]!
         posts(query: String): [Post!]!
+        comments: [Comment!]!
         me: User!
         post: Post!
     }
@@ -54,6 +78,7 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
     }
 
     type Post {
@@ -61,6 +86,12 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean!
+        author: User!
+    }
+    
+    type Comment {
+        id: ID!
+        text: String!
     }
 `;
 
@@ -87,6 +118,10 @@ const resolvers = {
                 return isTitleMatch || isBodyMatch
             })
         },
+        comments(parent, args, ctx, info) {
+            return comments
+
+        },
         me() {
             return {
                 id: '123098',
@@ -101,6 +136,20 @@ const resolvers = {
                 body: '',
                 published: false
             }
+        }
+    },
+    Post: {
+        author(parent, args, ctx, info) {
+            return users.find((user) => {
+                return user.id === parent.author
+            })
+        }
+    },
+    User: {
+        posts(parent, args, ctx, info) {
+            return posts.filter((post) => {
+                return post.author === parent.id
+            })
         }
     }
 };
